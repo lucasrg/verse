@@ -27,6 +27,10 @@ var Client = {
             //TODO
           } else if (key == 'render') {
             Client.recurse(el, val, context);
+          } else if (key == 'events') {
+            Object.keys(val).forEach(function(eventType) {
+              el.addEventListener(eventType, val[eventType])
+            });
           } else {
             el[key] = val;
           }

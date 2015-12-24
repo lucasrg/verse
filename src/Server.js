@@ -21,14 +21,16 @@ var Server = {
         var innerHTML = '';
         Object.keys(input).forEach(function(key) {
           var val = input[key];
-          if (key == 'tag' || key == 'listen') {
+          if (key == 'tag' || key == 'listen' || key == 'events') {
             // Ignore
           } else if (key == 'render') {
             innerHTML = Server.render(val, context);
           } else if (key == 'className') {
             tagDefinition += ' class="'+val+'"';
           } else {
-            tagDefinition += ' '+key+'="'+val+'"';
+            if (typeof val != 'function') {
+              tagDefinition += ' '+key+'="'+val+'"';
+            }
           }
         });
         tagDefinition += '>';
