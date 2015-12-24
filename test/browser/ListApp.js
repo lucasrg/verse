@@ -1,10 +1,3 @@
-var Store = function (state) {
-  this.state = state;
-}
-Store.prototype.trigger = function () {
-
-}
-
 var ListStore = new Store({
   items: []
 });
@@ -35,10 +28,9 @@ var ListApp = function(context) {
       List(context.stores.List),
       {
         tag:'form',
-        id: 'list-form',
         render: [
           {tag:'input', name:'name-field'},
-          {tag:'input', type:'submit', render:'Add item'}
+          {tag:'input', type:'submit', value:'Add item'}
         ],
         events: {
           'submit': function (e) {
