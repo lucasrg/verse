@@ -1,21 +1,21 @@
 {
-  "name": "universal",
+  "name": "verse",
   "version": "0.0.1",
-  "description": "Universal web framework",
+  "description": "Universal js web framework",
   "main": "index.js",
   "scripts": {
     "test": "make test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lucasrg/universal.git"
+    "url": "https://github.com/lucasrg/verse.git"
   },
   "author": "Lucas Goraieb <lucas.goraieb@gmail.com> (https://github.com/lucasrg)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lucasrg/universal/issues"
+    "url": "https://github.com/lucasrg/verse/issues"
   },
-  "homepage": "https://github.com/lucasrg/universal",
+  "homepage": "https://github.com/lucasrg/verse",
   "devDependencies": {
     "chai": "^3.4.1",
     "mocha": "^2.3.4"

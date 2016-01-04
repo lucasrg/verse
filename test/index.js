@@ -1,6 +1,6 @@
 var should = require('chai').should(),
-    universal = require('../index'),
-    Server = universal.Server;
+    verse = require('../index'),
+    Server = verse.Server;
 
 describe('#Server', function() {
   it('render static hello world', function() {
