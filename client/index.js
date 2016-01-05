@@ -81,3 +81,5 @@ var Client = {
     }
   }
 }
+
+module.exports = Client;

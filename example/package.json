@@ -1,0 +1,21 @@
+{
+  "name": "verse-example",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node server"
+  },
+  "main": "server.js",
+  "author": "Lucas Goraieb <lucas.goraieb@gmail.com> (https://github.com/lucasrg)",
+  "dependencies": {
+    "express": "^4.13.3",
+    "http-proxy": "^1.12.0",
+    "verse": "file:../"
+  },
+  "devDependencies": {
+    "webpack": "^1.12.9",
+    "webpack-dev-middleware": "^1.4.0",
+    "webpack-dev-server": "^1.14.0",
+    "webpack-hot-middleware": "^2.6.0"
+  }
+}
