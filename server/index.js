@@ -7,7 +7,12 @@ var Utils = {
       }
 };
 
+var Context = function () {}
+
 var Server = {
+  createContext: function () {
+    return new Context()
+  },
   render: function (input, context) {
     if (typeof input == 'object') {
       if (Utils.isArray(input)) {

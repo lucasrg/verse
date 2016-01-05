@@ -1,11 +1,9 @@
-var ListStore = new Store({
-  items: []
-});
-
-var ListActions = {
-  add: function (item) {
-    ListStore.state.items.push(item);
-    ListStore.trigger();
+var ListActions = function(context) {
+  return {
+    add: function (item) {
+      context.stores.List.items.push(item);
+      context.trigger('items-changed');
+    }
   }
 }
 
@@ -13,9 +11,9 @@ var List = function (store) {
   return {
     tag: 'ul',
     className: 'list-component',
-    listen: [store],
+    listen: ['items-changed'],
     render: function (context) {
-      return store.state.items.map(function(item) {
+      return context.stores.List.items.map(function(item) {
         return {tag: 'li', render: item.name}
       })
     }
@@ -39,7 +37,7 @@ var ListApp = function(context) {
               name: e.target.elements['name-field'].value
             }
             console.log('On Submit', item);
-            context.actions.List.add(item);
+            context.actions.List.add(item, context);
           }
         }
       }
@@ -48,13 +46,14 @@ var ListApp = function(context) {
 }
 
 function listApp() {
-  var context = {
-    stores: {
-      List: ListStore
-    },
-    actions: {
-      List: ListActions
+  var context = verse.createContext();
+  context.stores = {
+    List: {
+      items: []
     }
+  }
+  context.actions = {
+    List: new ListActions(context)
   }
   Client.render(document.getElementById('sandbox'), ListApp, context);
 }

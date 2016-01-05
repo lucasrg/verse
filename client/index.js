@@ -17,7 +17,37 @@ Listener.prototype.trigger = function() {
   this.state.element = newElement;
 }
 
+var Context = function () {
+  this.listeners = {};
+}
+
+Context.prototype.trigger = function () {
+  var args = Array.prototype.slice.call(arguments);
+  var selectedListeners = [];
+  args.forEach(function (event) {
+    var l = this.listeners[event];
+    if (l) {
+      this.listeners[event] = [];
+      selectedListeners = selectedListeners.concat(l)
+    } else {
+      console.warn('Warning! No event registered for "'+event+'"');
+    }
+  }.bind(this))
+  selectedListeners.forEach(function (listener) {
+    listener.trigger();
+  })
+
+}
+
+Context.prototype.register = function(event, listener) {
+  this.listeners[event] = this.listeners[event] || [];
+  this.listeners[event].push(listener);
+}
+
 var Client = {
+  createContext: function () {
+    return new Context();
+  },
   render: function (parent, input, context) {
     parent.innerHTML = '';
     this.recurse(parent,input,context);
@@ -28,13 +58,15 @@ var Client = {
       if (key == 'tag') {
         // Ignore
       } else if (key == 'listen') {
-        val.forEach(function (observer) {
-          observer.register(new Listener({
-            element: el,
-            component: input,
-            context: context
-          }));
-        })
+        if (context && context.register) {
+          val.forEach(function (observer) {
+            context.register(observer, new Listener({
+              element: el,
+              component: input,
+              context: context
+            }));
+          })
+        }
       } else if (key == 'render') {
         Client.recurse(el, val, context);
       } else if (key == 'events') {
