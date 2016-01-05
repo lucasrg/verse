@@ -9,7 +9,8 @@
   "files": [
     "index.js",
     "client/",
-    "server/"
+    "server/",
+    "store/"
   ],
   "repository": {
     "type": "git",

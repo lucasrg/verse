@@ -40,6 +40,13 @@ app.get('/', function (req, res) {
   res.send(verse.render(Html));
 });
 
+// Just a simple API test proxy
+var apiProxy = require('express-http-proxy');
+app.use('/api', apiProxy('jsonplaceholder.typicode.com', {
+  forwardPath: function(req, res) {
+    return require('url').parse(req.url).path.replace(/\/api/,'/');
+  }
+}));
 
 // It is important to catch any errors from the proxy or the
 // server will crash. An example of this is connecting to the

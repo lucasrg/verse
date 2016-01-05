@@ -9,7 +9,9 @@
   "author": "Lucas Goraieb <lucas.goraieb@gmail.com> (https://github.com/lucasrg)",
   "dependencies": {
     "express": "^4.13.3",
+    "express-http-proxy": "^0.6.0",
     "http-proxy": "^1.12.0",
+    "superagent": "^1.6.1",
     "verse": "file:../"
   },
   "devDependencies": {
