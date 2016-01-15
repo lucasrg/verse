@@ -55,7 +55,7 @@ var Client = {
   renderElement: function (el, input, context) {
     Object.keys(input).forEach(function(key) {
       var val = input[key];
-      if (key == 'tag') {
+      if (val == null || typeof val == 'undefined' || key == 'tag') {
         // Ignore
       } else if (key == 'listen') {
         if (context && context.register) {
@@ -74,7 +74,11 @@ var Client = {
           el.addEventListener(eventType, val[eventType])
         });
       } else {
-        el[key] = val;
+        if (typeof val == 'function') {
+          el[key] = val(context);
+        } else {
+          el[key] = val;
+        }
       }
     });
   },
