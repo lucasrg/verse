@@ -14,7 +14,9 @@ var Server = {
     return new Context()
   },
   render: function (input, context) {
-    if (typeof input == 'object') {
+    if (input == null || typeof input == 'undefined') {
+      return '';
+    } else if (typeof input == 'object') {
       if (Utils.isArray(input)) {
         var out = '';
         input.forEach(function (item) {
@@ -43,10 +45,9 @@ var Server = {
       }
     } else if (typeof input == 'function') {
       return this.render(input(context), context);
-    } else if (typeof input != 'undefined' && input != null){
+    } else {
       return input.toString();
     }
-    return '';
   }
 }
 

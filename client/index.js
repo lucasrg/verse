@@ -79,7 +79,9 @@ var Client = {
     });
   },
   recurse: function (parent, input, context) {
-    if (typeof input == 'object') {
+    if (input == null || typeof input == 'undefined') {
+      // ignore
+    } else if (typeof input == 'object') {
       if (Utils.isArray(input)) {
         input.forEach(function (item) {
           Client.recurse(parent, item, context)
@@ -91,7 +93,7 @@ var Client = {
       }
     } else if (typeof input == 'function') {
       this.recurse(parent, input(context), context);
-    } else if (typeof input != 'undefined' && input != null){
+    } else {
       parent.innerHTML = input.toString();
     }
   }
