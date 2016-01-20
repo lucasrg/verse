@@ -40,6 +40,7 @@ var Server = {
             } else {
               tagDefinition += ' '+key+'="'+val+'"';
             }
+            //TODO Handle 'style' attribute
           }
         });
         tagDefinition += '>';

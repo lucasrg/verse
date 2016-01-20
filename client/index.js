@@ -75,9 +75,16 @@ var Client = {
         });
       } else {
         if (typeof val == 'function') {
-          el[key] = val(context);
+          var value = val(context);
         } else {
-          el[key] = val;
+          var value = val;
+        }
+        if (key == 'style') {
+          Object.keys(value).forEach(function(styleKey) {
+            el.style[styleKey] = value[styleKey];
+          });
+        } else {
+          el[key] = value;
         }
       }
     });
