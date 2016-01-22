@@ -10,18 +10,20 @@ var Listener = function(state) {
 }
 
 Listener.prototype.trigger = function() {
-  var newElement = document.createElement(this.state.component.tag);
-  Client.renderElement(newElement, this.state.component, this.state.context);
-  var el = this.state.element;
-  el.parentNode.replaceChild(newElement, el);
-  this.state.element = newElement;
+  if (this.state.element) {
+    var newElement = document.createElement(this.state.component.tag);
+    Client.renderElement(newElement, this.state.component, this.state.context);
+    var el = this.state.element;
+    el.parentNode.replaceChild(newElement, el);
+    this.state.element = newElement;
+  }
 }
 
 var Context = function () {
   this.listeners = {};
 }
 
-Context.prototype.trigger = function () {
+Context.prototype.trigger = function (postRenderCallback) {
   var args = Array.prototype.slice.call(arguments);
   var selectedListeners = [];
   args.forEach(function (event) {
@@ -36,7 +38,7 @@ Context.prototype.trigger = function () {
   selectedListeners.forEach(function (listener) {
     listener.trigger();
   })
-
+  if (postRenderCallback) postRenderCallback(this.context, this.component, this.el);
 }
 
 Context.prototype.register = function(event, listener) {
