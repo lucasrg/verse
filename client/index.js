@@ -16,6 +16,8 @@ Listener.prototype.trigger = function() {
     var el = this.state.element;
     el.parentNode.replaceChild(newElement, el);
     this.state.element = newElement;
+  } else {
+    console.warn('Warning! Element not found on trigger', this.state.component);
   }
 }
 
@@ -23,22 +25,41 @@ var Context = function () {
   this.listeners = {};
 }
 
-Context.prototype.trigger = function (postRenderCallback) {
+Context.prototype.trigger = function () {
   var args = Array.prototype.slice.call(arguments);
   var selectedListeners = [];
   args.forEach(function (event) {
     var l = this.listeners[event];
     if (l) {
       this.listeners[event] = [];
-      selectedListeners = selectedListeners.concat(l)
+      l.forEach(function (listener) {
+        var found = false;
+        selectedListeners.some(function (selected) {
+          if (selected.state.component == listener.state.component) {
+            found = true;
+            return true;
+          }
+        })
+        if (!found) selectedListeners.push(listener);
+      })
     } else {
       console.warn('Warning! No event registered for "'+event+'"');
     }
   }.bind(this))
+
   selectedListeners.forEach(function (listener) {
     listener.trigger();
   })
-  if (postRenderCallback) postRenderCallback(this.context, this.component, this.el);
+  selectedListeners.forEach(function (listener) {
+    var c = listener.state.component;
+    if (c.events && c.events.render) {
+      c.events.render({
+        context: listener.state.context,
+        target: listener.state.element,
+        triggers: args
+      });
+    }
+  })
 }
 
 Context.prototype.register = function(event, listener) {
@@ -73,7 +94,9 @@ var Client = {
         Client.recurse(el, val, context);
       } else if (key == 'events') {
         Object.keys(val).forEach(function(eventType) {
-          el.addEventListener(eventType, val[eventType])
+          if (eventType != 'render') {
+            el.addEventListener(eventType, val[eventType])
+          }
         });
       } else {
         if (typeof val == 'function') {
