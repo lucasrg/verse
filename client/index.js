@@ -10,14 +10,16 @@ var Listener = function(state) {
 }
 
 Listener.prototype.trigger = function() {
-  if (this.state.element) {
+  var el = this.state.element;
+  if (el && el.parentNode) {
     var newElement = document.createElement(this.state.component.tag);
     Client.renderElement(newElement, this.state.component, this.state.context);
-    var el = this.state.element;
+    var pos = el.scrollTop;
     el.parentNode.replaceChild(newElement, el);
+    newElement.scrollTop = pos;
     this.state.element = newElement;
   } else {
-    console.warn('Warning! Element not found on trigger', this.state.component);
+    console.warn('Warning! Element parent node not found on trigger', this.state.component);
   }
 }
 
