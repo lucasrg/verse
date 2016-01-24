@@ -9,11 +9,11 @@ var Listener = function(state) {
   this.state = state;
 }
 
-Listener.prototype.trigger = function() {
+Listener.prototype.trigger = function(triggers) {
   var el = this.state.element;
   if (el && el.parentNode) {
     var newElement = document.createElement(this.state.component.tag);
-    Client.renderElement(newElement, this.state.component, this.state.context);
+    Client.renderElement(newElement, this.state.component, this.state.context, triggers);
     var pos = el.scrollTop;
     el.parentNode.replaceChild(newElement, el);
     newElement.scrollTop = pos;
@@ -50,17 +50,7 @@ Context.prototype.trigger = function () {
   }.bind(this))
 
   selectedListeners.forEach(function (listener) {
-    listener.trigger();
-  })
-  selectedListeners.forEach(function (listener) {
-    var c = listener.state.component;
-    if (c.events && c.events.render) {
-      c.events.render({
-        context: listener.state.context,
-        target: listener.state.element,
-        triggers: args
-      });
-    }
+    listener.trigger(args);
   })
 }
 
@@ -77,7 +67,7 @@ var Client = {
     parent.innerHTML = '';
     this.recurse(parent,input,context);
   },
-  renderElement: function (el, input, context) {
+  renderElement: function (el, input, context, triggers) {
     Object.keys(input).forEach(function(key) {
       var val = input[key];
       if (val == null || typeof val == 'undefined' || key == 'tag') {
@@ -115,6 +105,13 @@ var Client = {
         }
       }
     });
+    if (input.events && input.events.render) {
+      input.events.render({
+        context: context,
+        target: el,
+        triggers: triggers || []
+      });
+    }
   },
   recurse: function (parent, input, context) {
     if (input == null || typeof input == 'undefined') {
