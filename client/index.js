@@ -113,13 +113,14 @@ var Client = {
       });
     }
   },
-  recurse: function (parent, input, context) {
+  recurse: function (parent, input, context, append) {
     if (input == null || typeof input == 'undefined') {
       // ignore
     } else if (typeof input == 'object') {
       if (Utils.isArray(input)) {
+        parent.innerHTML = '';
         input.forEach(function (item) {
-          Client.recurse(parent, item, context)
+          Client.recurse(parent, item, context, true)
         })
       } else {
         var el = document.createElement(input.tag);
@@ -129,7 +130,7 @@ var Client = {
     } else if (typeof input == 'function') {
       this.recurse(parent, input(context), context);
     } else {
-      parent.innerHTML = input.toString();
+      parent.innerHTML = append ? parent.innerHTML + input.toString() : input.toString();
     }
   }
 }

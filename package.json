@@ -1,6 +1,6 @@
 {
   "name": "verse",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Universal js web framework",
   "main": "index.js",
   "scripts": {
