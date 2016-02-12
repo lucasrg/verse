@@ -11,15 +11,16 @@ var Listener = function(state) {
 
 Listener.prototype.trigger = function(triggers) {
   var el = this.state.element;
-  if (el && el.parentNode) {
+  var parentNode = el.parentNode || this.state.parentNode;
+  if (el && parentNode) {
     var newElement = document.createElement(this.state.component.tag);
     Client.renderElement(newElement, this.state.component, this.state.context, triggers);
     var pos = el.scrollTop;
-    el.parentNode.replaceChild(newElement, el);
+    parentNode.replaceChild(newElement, el);
     newElement.scrollTop = pos;
     this.state.element = newElement;
   } else {
-    console.warn('Warning! Element parent node not found on trigger', this.state.component);
+    //TODO console.warn('Warning! Element parent node not found on trigger', triggers, this.state.component);
   }
 }
 
@@ -29,29 +30,18 @@ var Context = function () {
 
 Context.prototype.trigger = function () {
   var args = Array.prototype.slice.call(arguments);
-  var selectedListeners = [];
   args.forEach(function (event) {
     var l = this.listeners[event];
+    this.listeners[event] = [];
     if (l) {
-      this.listeners[event] = [];
       l.forEach(function (listener) {
-        var found = false;
-        selectedListeners.some(function (selected) {
-          if (selected.state.component == listener.state.component) {
-            found = true;
-            return true;
-          }
-        })
-        if (!found) selectedListeners.push(listener);
+        listener.trigger(args);
       })
     } else {
       console.warn('Warning! No event registered for "'+event+'"');
     }
   }.bind(this))
 
-  selectedListeners.forEach(function (listener) {
-    listener.trigger(args);
-  })
 }
 
 Context.prototype.register = function(event, listener) {
@@ -76,6 +66,7 @@ var Client = {
         if (context && context.register) {
           val.forEach(function (observer) {
             context.register(observer, new Listener({
+              parentNode: el.parentNode,
               element: el,
               component: input,
               context: context
