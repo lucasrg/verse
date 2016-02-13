@@ -13,12 +13,16 @@ Listener.prototype.trigger = function(triggers) {
   var el = this.state.element;
   var parentNode = el.parentNode || this.state.parentNode;
   if (el && parentNode) {
-    var newElement = document.createElement(this.state.component.tag);
-    Client.renderElement(newElement, this.state.component, this.state.context, triggers);
-    var pos = el.scrollTop;
-    parentNode.replaceChild(newElement, el);
-    newElement.scrollTop = pos;
-    this.state.element = newElement;
+    if (this.state.component.render) {
+      var newElement = document.createElement(this.state.component.tag);
+      Client.renderElement(newElement, this.state.component, this.state.context, triggers);
+      var pos = el.scrollTop;
+      parentNode.replaceChild(newElement, el);
+      newElement.scrollTop = pos;
+      this.state.element = newElement;
+    } else {
+      Client.renderElement(el, this.state.component, this.state.context, triggers);
+    }
   } else {
     //TODO console.warn('Warning! Element parent node not found on trigger', triggers, this.state.component);
   }
