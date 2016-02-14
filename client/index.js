@@ -11,21 +11,11 @@ var Listener = function(state) {
 
 Listener.prototype.trigger = function(triggers) {
   var el = this.state.element;
-  var parentNode = el.parentNode || this.state.parentNode;
-  if (el && parentNode) {
-    if (this.state.component.render) {
-      var newElement = document.createElement(this.state.component.tag);
-      Client.renderElement(newElement, this.state.component, this.state.context, triggers);
-      var pos = el.scrollTop;
-      parentNode.replaceChild(newElement, el);
-      newElement.scrollTop = pos;
-      this.state.element = newElement;
-    } else {
-      Client.renderElement(el, this.state.component, this.state.context, triggers);
-    }
-  } else {
-    //TODO console.warn('Warning! Element parent node not found on trigger', triggers, this.state.component);
+  while(el.attributes.length > 0) {
+    el.removeAttribute(el.attributes[0].name);
   }
+  el.innerHTML = '';
+  Client.renderElement(el, this.state.component, this.state.context, triggers);
 }
 
 var Context = function () {
@@ -80,11 +70,14 @@ var Client = {
       } else if (key == 'render') {
         Client.recurse(el, val, context);
       } else if (key == 'events') {
-        Object.keys(val).forEach(function(eventType) {
-          if (eventType != 'render') {
-            el.addEventListener(eventType, val[eventType])
-          }
-        });
+        if (!el.__events_initialized__) {
+          el.__events_initialized__ = true;
+          Object.keys(val).forEach(function(eventType) {
+            if (eventType != 'render') {
+              el.addEventListener(eventType, val[eventType], false)
+            }
+          });
+        }
       } else {
         if (typeof val == 'function') {
           var value = val(context);
