@@ -14,33 +14,52 @@ Listener.prototype.trigger = function(triggers) {
   while(el.attributes.length > 0) {
     el.removeAttribute(el.attributes[0].name);
   }
-  el.innerHTML = '';
-  Client.renderElement(el, this.state.component, this.state.context, triggers);
+  while (el.firstChild) {
+    el.firstChild.__removed = true;
+    el.removeChild(el.firstChild);
+  }
+  Client.renderElement(el, this.state.component, this.state.context, false, triggers);
 }
 
 var Context = function () {
   this.listeners = {};
+  this.listenersUniqueId = 0;
 }
 
 Context.prototype.trigger = function () {
   var args = Array.prototype.slice.call(arguments);
-  args.forEach(function (event) {
-    var l = this.listeners[event];
-    this.listeners[event] = [];
-    if (l) {
-      l.forEach(function (listener) {
-        listener.trigger(args);
-      })
-    } else {
-      console.warn('Warning! No event registered for "'+event+'"');
+  var listeners = Object.keys(this.listeners);
+  var selected = {};
+  var selectedList = [];
+  listeners.forEach(function (uid) {
+    var l = this.listeners[uid];
+    if (l.state.element.__removed) {
+      delete this.listeners[uid];
+      return;
     }
+    args.forEach(function (event) {
+      if (!selected[l.state.component._uid] && l.state.component.listen.indexOf(event) >= 0) {
+        selected[l.state.component._uid] = l;
+        selectedList.push(l);
+      }
+    });
   }.bind(this))
-
+  selectedList.forEach(function (l) {
+    delete this.listeners[l.state.component._uid];
+    l.trigger(args);
+  }.bind(this));
 }
 
-Context.prototype.register = function(event, listener) {
-  this.listeners[event] = this.listeners[event] || [];
-  this.listeners[event].push(listener);
+Context.prototype.register = function(component, element) {
+  if (!component._uid) component._uid = (++this.listenersUniqueId);
+  if (!this.listeners[component._uid]) {
+    this.listeners[component._uid] = new Listener({
+      parentNode: element.parentNode,
+      element: element,
+      component: component,
+      context: this
+    });
+  }
 }
 
 var Client = {
@@ -51,27 +70,19 @@ var Client = {
     parent.innerHTML = '';
     this.recurse(parent,input,context);
   },
-  renderElement: function (el, input, context, triggers) {
+  renderElement: function (el, input, context, initialize, triggers) {
     Object.keys(input).forEach(function(key) {
       var val = input[key];
       if (val == null || typeof val == 'undefined' || key == 'tag') {
         // Ignore
       } else if (key == 'listen') {
-        if (context && context.register) {
-          val.forEach(function (observer) {
-            context.register(observer, new Listener({
-              parentNode: el.parentNode,
-              element: el,
-              component: input,
-              context: context
-            }));
-          })
+        if (context) {
+          context.register(input, el);
         }
       } else if (key == 'render') {
         Client.recurse(el, val, context);
       } else if (key == 'events') {
-        if (!el.__events_initialized__) {
-          el.__events_initialized__ = true;
+        if (initialize) {
           Object.keys(val).forEach(function(eventType) {
             if (eventType != 'render') {
               el.addEventListener(eventType, val[eventType], false)
@@ -112,7 +123,7 @@ var Client = {
         })
       } else {
         var el = document.createElement(input.tag);
-        Client.renderElement(el, input, context);
+        Client.renderElement(el, input, context, true);
         parent.appendChild(el);
       }
     } else if (typeof input == 'function') {
