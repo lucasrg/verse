@@ -117,7 +117,6 @@ var Client = {
       // ignore
     } else if (typeof input == 'object') {
       if (Utils.isArray(input)) {
-        parent.innerHTML = '';
         input.forEach(function (item) {
           Client.recurse(parent, item, context, true)
         })
