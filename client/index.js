@@ -5,22 +5,6 @@ var Utils = {
       }
 };
 
-var Listener = function(state) {
-  this.state = state;
-}
-
-Listener.prototype.trigger = function(triggers) {
-  var el = this.state.element;
-  while(el.attributes.length > 0) {
-    el.removeAttribute(el.attributes[0].name);
-  }
-  while (el.firstChild) {
-    el.firstChild.__removed = true;
-    el.removeChild(el.firstChild);
-  }
-  Client.renderElement(el, this.state.component, this.state.context, false, triggers);
-}
-
 var Context = function () {
   this.listeners = {};
   this.listenersUniqueId = 0;
@@ -33,32 +17,49 @@ Context.prototype.trigger = function () {
   var selectedList = [];
   listeners.forEach(function (uid) {
     var l = this.listeners[uid];
-    if (l.state.element.__removed) {
+    if (l.element.__removed) {
       delete this.listeners[uid];
       return;
     }
     args.forEach(function (event) {
-      if (!selected[l.state.component._uid] && l.state.component.listen.indexOf(event) >= 0) {
-        selected[l.state.component._uid] = l;
+      if (!selected[l.component._uid] && l.component.listen.indexOf(event) >= 0) {
+        l.element.__trigger = l;
+        selected[l.component._uid] = l;
         selectedList.push(l);
       }
     });
   }.bind(this))
-  selectedList.forEach(function (l) {
-    delete this.listeners[l.state.component._uid];
-    l.trigger(args);
-  }.bind(this));
+
+  var recurseDOM = function (node) {
+    if (node.__trigger) {
+      var l = node.__trigger;
+      delete node.__trigger;
+      while(node.attributes.length > 0) {
+        node.removeAttribute(node.attributes[0].name);
+      }
+      while (node.firstChild) {
+        node.firstChild.__removed = true;
+        node.removeChild(node.firstChild);
+      }
+      Client.renderElement(node, l.component, l.context, false, args);
+    } else {
+      node = node.firstChild;
+      while(node) {
+        recurseDOM(node);
+        node = node.nextSibling;
+      }
+    }
+  };
+
+  recurseDOM(document);
 }
 
 Context.prototype.register = function(component, element) {
   if (!component._uid) component._uid = (++this.listenersUniqueId);
-  if (!this.listeners[component._uid]) {
-    this.listeners[component._uid] = new Listener({
-      parentNode: element.parentNode,
-      element: element,
-      component: component,
-      context: this
-    });
+  this.listeners[component._uid] = {
+    element: element,
+    component: component,
+    context: this
   }
 }
 
