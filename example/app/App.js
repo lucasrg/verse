@@ -1,33 +1,12 @@
-module.exports = function (context) {
+var Examples = require('./Examples');
+var ScriptRunner = require('./ScriptRunner');
+
+module.exports = function (ctx) {
+  var examples = Examples.map(function (example) {
+    return ScriptRunner(ctx, {example: example});
+  })
   return [
-    {tag:'h1', render:'Posts Example'},
-    {tag:'div', listen:['posts'], render: function () {
-      if (context.stores.posts.loading) {
-        return {tag:'button', render: 'Loading...', disabled: true}
-      } else if (context.stores.posts.items.length > 0) {
-        return {tag:'button',
-          render: 'Clear '+context.stores.posts.items.length+' posts',
-          events: {
-            'click': function () {
-              context.actions.posts.clear();
-            }
-          }
-        }
-      } else {
-        return {tag:'button',
-          render: 'Load posts',
-          events: {
-            'click': function () {
-              context.actions.posts.list();
-            }
-          }
-        }
-      }
-    }},
-    {tag:'ul', listen: ['posts'], render: function (context) {
-      return context.stores.posts.items.map(function(item) {
-        return {tag: 'li', render: item.title}
-      })
-    }}
+    {tag:'h1', render:'Verse'},
+    {tag:'div', render: examples}
   ]
 }

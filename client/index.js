@@ -5,7 +5,12 @@ var Utils = {
       }
 };
 
-var Context = function () {
+var Context = function (ctx) {
+  if (ctx) {
+    Object.keys(ctx).forEach(function(key) {
+      this[key] = ctx[key];
+    }.bind(this));
+  }
   this.listeners = {};
   this.listenersUniqueId = 0;
 }
@@ -68,6 +73,9 @@ var Client = {
     return new Context();
   },
   render: function (parent, input, context) {
+    if (context && !(context instanceof Context)) {
+      context = new Context(context);
+    }
     parent.innerHTML = '';
     this.recurse(parent,input,context);
   },
