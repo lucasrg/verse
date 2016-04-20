@@ -11,26 +11,38 @@ var Context = function (ctx) {
       this[key] = ctx[key];
     }.bind(this));
   }
-  this.listeners = {};
-  this.listenersUniqueId = 0;
+  this.__listeners = {};
+  this.__listenersUniqueId = 0;
+  this.__lastTriggeredEvents = {};
 }
 
 Context.prototype.trigger = function () {
-  var args = Array.prototype.slice.call(arguments);
-  var listeners = Object.keys(this.listeners);
-  var selected = {};
-  var selectedList = [];
+  var triggeredEvents = Array.prototype.slice.call(arguments);
+  triggeredEvents.forEach(function (event) {
+    this.__lastTriggeredEvents[event] = true;
+  }.bind(this));
+
+  if (!this.__triggerTimeout) {
+    var self = this;
+    this.__triggerTimeout = setTimeout(function () {
+      self.executeTriggers(Object.keys(self.__lastTriggeredEvents));
+      self.__lastTriggeredEvents = {};
+      self.__triggerTimeout = null;
+    }, 0);
+  }
+}
+
+Context.prototype.executeTriggers = function (triggeredEvents) {
+  var listeners = Object.keys(this.__listeners);
   listeners.forEach(function (uid) {
-    var l = this.listeners[uid];
+    var l = this.__listeners[uid];
     if (l.element.__removed) {
-      delete this.listeners[uid];
+      delete this.__listeners[uid];
       return;
     }
-    args.forEach(function (event) {
-      if (!selected[l.component._uid] && l.component.listen.indexOf(event) >= 0) {
+    triggeredEvents.forEach(function (event) {
+      if (l.component.listen.indexOf(event) >= 0) {
         l.element.__trigger = l;
-        selected[l.component._uid] = l;
-        selectedList.push(l);
       }
     });
   }.bind(this))
@@ -46,7 +58,7 @@ Context.prototype.trigger = function () {
         node.firstChild.__removed = true;
         node.removeChild(node.firstChild);
       }
-      Client.renderElement(node, l.component, l.context, false, args);
+      Client.renderElement(node, l.component, l.context, false, triggeredEvents);
     } else {
       node = node.firstChild;
       while(node) {
@@ -60,8 +72,8 @@ Context.prototype.trigger = function () {
 }
 
 Context.prototype.register = function(component, element) {
-  if (!component._uid) component._uid = (++this.listenersUniqueId);
-  this.listeners[component._uid] = {
+  if (!component._uid) component._uid = (++this.__listenersUniqueId);
+  this.__listeners[component._uid] = {
     element: element,
     component: component,
     context: this
