@@ -1,105 +1,35 @@
-var Utils = {
-  isArray: ('isArray' in Array) ? Array.isArray :
-      function (value) {
-          return Object.prototype.toString.call(value) === '[object Array]';
-      }
-};
-
-var Context = function (ctx) {
-  if (ctx) {
-    Object.keys(ctx).forEach(function(key) {
-      this[key] = ctx[key];
-    }.bind(this));
-  }
-  this.__listeners = {};
-  this.__listenersUniqueId = 0;
-  this.__lastTriggeredEvents = {};
-}
-
-Context.prototype.trigger = function () {
-  var triggeredEvents = Array.prototype.slice.call(arguments);
-  triggeredEvents.forEach(function (event) {
-    this.__lastTriggeredEvents[event] = true;
-  }.bind(this));
-
-  if (!this.__triggerTimeout) {
-    var self = this;
-    this.__triggerTimeout = setTimeout(function () {
-      self.executeTriggers(Object.keys(self.__lastTriggeredEvents));
-      self.__lastTriggeredEvents = {};
-      self.__triggerTimeout = null;
-    }, 0);
-  }
-}
-
-Context.prototype.executeTriggers = function (triggeredEvents) {
-  var listeners = Object.keys(this.__listeners);
-  listeners.forEach(function (uid) {
-    var l = this.__listeners[uid];
-    if (l.element.__removed) {
-      delete this.__listeners[uid];
-      return;
-    }
-    triggeredEvents.forEach(function (event) {
-      if (l.component.listen.indexOf(event) >= 0) {
-        l.element.__trigger = l;
-      }
-    });
-  }.bind(this))
-
-  var recurseDOM = function (node) {
-    if (node.__trigger) {
-      var l = node.__trigger;
-      delete node.__trigger;
-      while(node.attributes.length > 0) {
-        node.removeAttribute(node.attributes[0].name);
-      }
-      while (node.firstChild) {
-        node.firstChild.__removed = true;
-        node.removeChild(node.firstChild);
-      }
-      Client.renderElement(node, l.component, l.context, false, triggeredEvents);
-    } else {
-      node = node.firstChild;
-      while(node) {
-        recurseDOM(node);
-        node = node.nextSibling;
-      }
-    }
-  };
-
-  recurseDOM(document);
-}
-
-Context.prototype.register = function(component, element) {
-  if (!component._uid) component._uid = (++this.__listenersUniqueId);
-  this.__listeners[component._uid] = {
-    element: element,
-    component: component,
-    context: this
-  }
-}
-
 var Client = {
-  createContext: function () {
-    return new Context();
-  },
   render: function (parent, input, context) {
-    if (context && !(context instanceof Context)) {
-      context = new Context(context);
-    }
+    contextualize(context);
     parent.innerHTML = '';
-    this.recurse(parent,input,context);
+    Client.recurse(parent,input,context);
+  },
+  recurse: function (parent, input, context, append) {
+    if (input == null || typeof input == 'undefined') {
+      // ignore
+    } else if (typeof input == 'object') {
+      if (isArray(input)) {
+        input.forEach(function (item) {
+          Client.recurse(parent, item, context, true)
+        })
+      } else {
+        var el = document.createElement(input.tag);
+        Client.renderElement(el, input, context, true);
+        parent.appendChild(el);
+      }
+    } else if (typeof input == 'function') {
+      Client.recurse(parent, input(context), context);
+    } else {
+      parent.innerHTML = append ? parent.innerHTML + input.toString() : input.toString();
+    }
   },
   renderElement: function (el, input, context, initialize, triggers) {
     Object.keys(input).forEach(function(key) {
       var val = input[key];
       if (val == null || typeof val == 'undefined' || key == 'tag') {
         // Ignore
-      } else if (key == 'listen') {
-        if (context) {
-          context.register(input, el);
-        }
+      } else if (key == 'listen' && context) {
+        context.__register(input, el);
       } else if (key == 'render') {
         Client.recurse(el, val, context);
       } else if (key == 'events') {
@@ -133,23 +63,72 @@ var Client = {
       });
     }
   },
-  recurse: function (parent, input, context, append) {
-    if (input == null || typeof input == 'undefined') {
-      // ignore
-    } else if (typeof input == 'object') {
-      if (Utils.isArray(input)) {
-        input.forEach(function (item) {
-          Client.recurse(parent, item, context, true)
-        })
-      } else {
-        var el = document.createElement(input.tag);
-        Client.renderElement(el, input, context, true);
-        parent.appendChild(el);
+  recurseDOM: function (node, triggeredEvents) {
+    if (node.__trigger) {
+      var l = node.__trigger;
+      delete node.__trigger;
+      while(node.attributes.length > 0) {
+        node.removeAttribute(node.attributes[0].name);
       }
-    } else if (typeof input == 'function') {
-      this.recurse(parent, input(context), context);
+      while (node.firstChild) {
+        node.firstChild.__removed = true;
+        node.removeChild(node.firstChild);
+      }
+      Client.renderElement(node, l.component, l.context, false, triggeredEvents);
     } else {
-      parent.innerHTML = append ? parent.innerHTML + input.toString() : input.toString();
+      node = node.firstChild;
+      while(node) {
+        Client.recurseDOM(node, triggeredEvents);
+        node = node.nextSibling;
+      }
+    }
+  }
+}
+
+var isArray = ('isArray' in Array) ? Array.isArray : function (value) {
+  return Object.prototype.toString.call(value) === '[object Array]';
+}
+
+function contextualize(ctx) {
+  if (!ctx || ctx.__register) return;
+
+  ctx.__listeners = {};
+  ctx.__listenersUniqueId = 0;
+  ctx.__lastTriggeredEvents = {};
+
+  ctx.__register = function(component, element) {
+    if (!component._uid) component._uid = (++ctx.__listenersUniqueId);
+    ctx.__listeners[component._uid] = {
+      element: element,
+      component: component,
+      context: ctx
+    }
+  }
+
+  ctx.trigger = function () {
+    Array.prototype.slice.call(arguments).forEach(function (event) {
+      ctx.__lastTriggeredEvents[event] = true;
+    });
+
+    if (!ctx.__triggerTimeout) {
+      ctx.__triggerTimeout = setTimeout(function () {
+        var triggeredEvents = Object.keys(ctx.__lastTriggeredEvents);
+        ctx.__lastTriggeredEvents = {};
+        ctx.__triggerTimeout = null;
+        Object.keys(ctx.__listeners).forEach(function (uid) {
+          var l = ctx.__listeners[uid];
+          if (l.element.__removed) {
+            delete ctx.__listeners[uid];
+            return;
+          }
+          triggeredEvents.forEach(function (event) {
+            if (l.component.listen.indexOf(event) >= 0) {
+              l.element.__trigger = l;
+            }
+          });
+        });
+        Client.recurseDOM(document, triggeredEvents);
+      }, 0);
     }
   }
 }
