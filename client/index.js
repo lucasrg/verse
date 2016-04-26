@@ -56,11 +56,13 @@ var Client = {
       }
     });
     if (input.events && input.events.render) {
-      input.events.render({
-        context: context,
-        target: el,
-        triggers: triggers || []
-      });
+      setTimeout(function () {
+        input.events.render({
+          context: context,
+          target: el,
+          triggers: triggers || []
+        });
+      }, 0)
     }
   },
   recurseDOM: function (node, triggeredEvents) {
