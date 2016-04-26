@@ -1,17 +1,16 @@
 var PostActions = require('./actions/PostActions');
 
-module.exports = function(context) {
+module.exports = {
 
-  context.stores = {
+  stores: {
     compiled: {},
     posts: {
       items: []
     }
+  },
+
+  actions: {
+    posts: PostActions(this)
   }
 
-  context.actions = {
-    posts: PostActions(context)
-  }
-
-  return context;
 }

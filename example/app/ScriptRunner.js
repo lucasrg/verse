@@ -1,7 +1,11 @@
 var verse = require('verse/client')
 
 function toScript(example) {
-  var script = "var template = "+example.template;
+  var script = '';
+  if (example.components) {
+    script += example.components+'\n\n';
+  }
+  script += "var template = "+example.template;
   if (example.context) {
     var context = 'var context = '+example.context+';';
     var render = "\nvar target = document.getElementById('"+example.id+"')\nverse.render(target, template, context);";
@@ -20,7 +24,7 @@ module.exports = function (ctx, props) {
     {tag:'h3', render: example.description.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")},
     {tag:'div', className:'input', render:[
       {tag:'form', render:[
-        {tag:'textarea', name:'input', rows: example.rows, cols: 80, value: toScript(example)},
+        {tag:'textarea', name:'input', rows: example.rows, cols: 120, value: toScript(example)},
         {tag:'button', render:'Run'}
       ], events:{
         submit: function (e) {
