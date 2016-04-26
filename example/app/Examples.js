@@ -76,7 +76,7 @@ module.exports = [
       },\n\
       events: {\n\
         render: function(e) {\n\
-          e.target.innerHTML = '<a href=\"#\">'+ e.target.innerHTML + '</a> <span> <--- Injected link</span>';\n\
+          $(e.target).animate({fontSize: \"3em\", height: \"show\"}, 1000)\n\
         }\n\
       }\n\
     },\n\
