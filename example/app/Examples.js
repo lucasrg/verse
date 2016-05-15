@@ -61,5 +61,48 @@ module.exports = [
     }}\n\
   ]\n\
 }"
+  },
+  {
+    id: 'example7',
+    title: 'Example #7 - Render Event',
+    description: 'Good for third-party addons, the render event gives access to the DOM element when needed',
+    context: "{renderCount:1}",
+    rows: 25,
+    template:
+"function(ctx) {\n\
+  return [\n\
+    { tag:'div', listen:['trigger-name'], render: function (context) {\n\
+        return [{tag:'i', render:'Render count: '}, {tag:'b', render:context.renderCount}]\n\
+      },\n\
+      events: {\n\
+        render: function(e) {\n\
+          $(e.target).animate({fontSize: \"3em\", height: \"show\"}, 1000)\n\
+        }\n\
+      }\n\
+    },\n\
+    {tag:'button', render:'Render again', events:{\n\
+      click: function(e) {\n\
+        ctx.renderCount++;\n\
+        ctx.trigger('trigger-name');\n\
+      }\n\
+    }}\n\
+  ]\n\
+}"
+  },
+  {
+    id: 'example8',
+    title: 'Example #8 - Components',
+    description: 'Quite easy to create a component',
+    context: "{beatles:['John','Paul','George','Ringo']}",
+    rows: 15,
+    components:
+"var BeatlesComponent = function(name) {\n\
+  return {tag:'li', render:name}\n\
+}",
+    template:
+"{tag:'ul', render: function (ctx) {\n\
+    return ctx.beatles.map(BeatlesComponent)\n\
+  }\n\
+}"
   }
 ]

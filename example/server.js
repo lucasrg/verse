@@ -38,8 +38,7 @@ var Html = require('./app/Html')
 var Context = require('./app/Context')
 
 app.get('/', function (req, res) {
-  var context = Context(verse.createContext());
-  res.send(verse.render(Html, context));
+  res.send(verse.render({template: Html, context: Context}));
 });
 
 // Just a simple API test proxy

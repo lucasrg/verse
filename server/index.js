@@ -1,26 +1,17 @@
 'use strict';
 
-var Utils = {
-  isArray: ('isArray' in Array) ? Array.isArray :
-      function (value) {
-          return Object.prototype.toString.call(value) === '[object Array]';
-      }
-};
-
-var Context = function () {}
-
 var Server = {
-  createContext: function () {
-    return new Context()
+  render: function (options) {
+    return this.recurse(options.template, options.context);
   },
-  render: function (input, context) {
+  recurse: function (input, context) {
     if (input == null || typeof input == 'undefined') {
       return '';
     } else if (typeof input == 'object') {
-      if (Utils.isArray(input)) {
+      if (Array.isArray(input)) {
         var out = '';
         input.forEach(function (item) {
-          out += Server.render(item, context)
+          out += Server.recurse(item, context)
         })
         return out;
       } else {
@@ -31,7 +22,7 @@ var Server = {
           if (key == 'tag' || key == 'listen' || key == 'events' || val == null || typeof val == 'undefined') {
             // Ignore
           } else if (key == 'render') {
-            innerHTML = Server.render(val, context);
+            innerHTML = Server.recurse(val, context);
           } else if (key == 'className') {
             tagDefinition += ' class="'+val+'"';
           } else {
@@ -47,7 +38,7 @@ var Server = {
         return tagDefinition + innerHTML + '</'+input.tag+'>';
       }
     } else if (typeof input == 'function') {
-      return this.render(input(context), context);
+      return this.recurse(input(context), context);
     } else {
       return input.toString();
     }

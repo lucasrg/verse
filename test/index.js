@@ -9,11 +9,12 @@ describe('#Server', function() {
         {tag:'body', render: {tag:'h1', render:'Hello World!'}}
       ]
     };
-    verse.render(template).should.equal('<html><head></head><body><h1>Hello World!</h1></body></html>');
+    verse.render({ template: template})
+      .should.equal('<html><head></head><body><h1>Hello World!</h1></body></html>');
   });
 
   it('render context hello world', function() {
-    var helloWorldContext = {
+    var context = {
       title: 'Hello World?',
       nested: {subtitle: 'Hello Hello'}
     };
@@ -32,7 +33,8 @@ describe('#Server', function() {
         ]
       }
     };
-    verse.render(template, helloWorldContext).should.equal('<html><head></head><body><h1 class="title">Hello World?</h1><h2>Hello Hello</h2></body></html>');
+    verse.render({template: template, context: context})
+      .should.equal('<html><head></head><body><h1 class="title">Hello World?</h1><h2>Hello Hello</h2></body></html>');
   });
 
   it('render components', function() {
@@ -43,8 +45,8 @@ describe('#Server', function() {
     var HelloWorldComponent = function(context){
       return {tag:'h1', render: [ HelloComponent, WorldComponent({name: context.prefix}), WorldComponent({name: 'World'}) ]}
     }
-    var helloWorldContext = {prefix: 'Big Old'};
-    verse.render(HelloWorldComponent, helloWorldContext).should.equal('<h1><span>Hello</span><span>Big Old</span><span>World</span></h1>');
+    verse.render({template: HelloWorldComponent, context: {prefix: 'Big Old'}})
+      .should.equal('<h1><span>Hello</span><span>Big Old</span><span>World</span></h1>');
   });
 
 });
