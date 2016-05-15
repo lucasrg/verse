@@ -3,5 +3,10 @@ var App = require('./App')
 var Context = require('./Context');
 
 document.addEventListener('DOMContentLoaded', function() {
-  verse.render(document.getElementById('app'), App, Context);
+  verse.render({
+    root: document.getElementById('app'),
+    template: App,
+    context: Context,
+    reconcile: true
+  });
 }, false);

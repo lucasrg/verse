@@ -1,25 +1,36 @@
 var Client = {
-  render: function (parent, input, context) {
-    contextualize(context);
-    parent.innerHTML = '';
-    Client.recurse(parent,input,context);
+  render: function (options) {
+    if (options.context) contextualize(options.context);
+    if (!options.reconcile) options.root.innerHTML = '';
+    try {
+      Client.recurse(options.root,options.template,options.context, options.reconcile, false);
+    } catch (e) {
+      if (e.name == 'ReconcileError') {
+        options.root.innerHTML = '';
+        Client.recurse(options.root,options.template,options.context);
+      }
+    }
   },
-  recurse: function (parent, input, context, append) {
+  recurse: function (parent, input, context, reconcile, append) {
     if (input == null || typeof input == 'undefined') {
       // ignore
     } else if (typeof input == 'object') {
       if (isArray(input)) {
         input.forEach(function (item) {
-          Client.recurse(parent, item, context, true)
+          Client.recurse(parent, item, context, reconcile, true)
         })
       } else {
-        var el = document.createElement(input.tag);
-        Client.renderElement(el, input, context, true);
-        parent.appendChild(el);
+        if (reconcile) {
+          Client.reconcileElement(parent, input, context);
+        } else {
+          var el = document.createElement(input.tag);
+          Client.renderElement(el, input, context, true);
+          parent.appendChild(el);
+        }
       }
     } else if (typeof input == 'function') {
-      Client.recurse(parent, input(context), context);
-    } else {
+      Client.recurse(parent, input(context), context, reconcile, append);
+    } else if (!reconcile) {
       parent.innerHTML = append ? parent.innerHTML + input.toString() : input.toString();
     }
   },
@@ -65,6 +76,33 @@ var Client = {
       }, 0)
     }
   },
+  reconcileElement: function(parent, input, context) {
+    if (!parent.firstChild) return;
+    if (!parent.__cc) parent.__cc = parent.firstChild;
+    var el = parent.__cc;
+    parent.__cc = el.nextSibling;
+    if (el.tagName.toLowerCase() != input.tag.toLowerCase()) {
+      console.warn('Warning! Reconcilliation failed at', el, input, el.outerHTML);
+      throw new ReconcileError();
+    }
+    if (input.listen && context) {
+      context.__register(input, el);
+    }
+    if (input.events) {
+      Object.keys(input.events).forEach(function(eventType) {
+        if (eventType == 'render') {
+          setTimeout(function () {
+            input.events.render({context: context, target: el, triggers: []});
+          }, 0)
+        } else {
+          el.addEventListener(eventType, input.events[eventType], false)
+        }
+      });
+    }
+    if (input.render) {
+      Client.recurse(el, input.render, context, true, false);
+    }
+  },
   recurseDOM: function (node, triggeredEvents) {
     if (node.__trigger) {
       var l = node.__trigger;
@@ -92,7 +130,7 @@ var isArray = ('isArray' in Array) ? Array.isArray : function (value) {
 }
 
 function contextualize(ctx) {
-  if (!ctx || ctx.__register) return;
+  if (ctx.__register) return;
 
   ctx.__listeners = {};
   ctx.__listenersUniqueId = 0;
@@ -134,5 +172,12 @@ function contextualize(ctx) {
     }
   }
 }
+
+function ReconcileError() {
+  this.name = 'ReconcileError';
+  this.stack = (new Error()).stack;
+}
+ReconcileError.prototype = Object.create(Error.prototype);
+ReconcileError.prototype.constructor = ReconcileError;
 
 module.exports = Client;

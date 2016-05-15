@@ -5,15 +5,19 @@ function toScript(example) {
   if (example.components) {
     script += example.components+'\n\n';
   }
-  script += "var template = "+example.template;
   if (example.context) {
-    var context = 'var context = '+example.context+';';
-    var render = "\nvar target = document.getElementById('"+example.id+"')\nverse.render(target, template, context);";
-    return context+'\n\n'+script+'\n'+render;
-  } else {
-    var render = "\nvar target = document.getElementById('"+example.id+"')\nverse.render(target, template);";
-    return script+'\n'+render;
+    script += 'var context = '+example.context+'\n';
   }
+  script += "var template = "+example.template+'\n';
+
+  script += "verse.render({\n";
+  script += "  root: document.getElementById('"+example.id+"'),\n";
+  if (example.context) {
+    script += "  context: context,\n";
+  }
+  script += "  template: template\n";
+  script += "})";
+  return script;
 }
 
 module.exports = function (ctx, props) {
