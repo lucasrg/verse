@@ -2,7 +2,7 @@
 
 var Server = {
   render: function (options) {
-    return this.recurse(options.template, options.context);
+    return this.recurse(options.template, contextualize(options.context));
   },
   recurse: function (input, context) {
     if (input == null || typeof input == 'undefined') {
@@ -23,15 +23,23 @@ var Server = {
             // Ignore
           } else if (key == 'render') {
             innerHTML = Server.recurse(val, context);
-          } else if (key == 'className') {
-            tagDefinition += ' class="'+val+'"';
           } else {
+            if (key == 'className') key = 'class';
             if (typeof val == 'function') {
-              tagDefinition += ' '+key+'="'+val(context)+'"';
+              var value = val(context);
             } else {
-              tagDefinition += ' '+key+'="'+val+'"';
+              var value = val;
             }
-            //TODO Handle 'style' attribute
+            if (key == 'style') {
+              var styleValue = '';
+              var styleKeyValuePairs = '';
+              Object.keys(value).forEach(function(styleKey) {
+                var dashedKey = styleKey.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+                styleKeyValuePairs += dashedKey+':'+value[styleKey]+';';
+              });
+              value = styleKeyValuePairs;
+            }
+            tagDefinition += ' '+key+'="'+value+'"';
           }
         });
         tagDefinition += '>';
@@ -43,6 +51,13 @@ var Server = {
       return input.toString();
     }
   }
+}
+
+function contextualize(ctx) {
+  if (ctx) {
+    ctx.trigger = ctx.trigger || function () {};
+  }
+  return ctx;
 }
 
 module.exports = Server;
