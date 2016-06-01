@@ -7,6 +7,22 @@
 
 ##The Template
 
+```js
+{
+  tag: 'div',
+  className: 'css-class',
+  style: {backgroundColor:'blue'},
+  listen: ['trigger-name', 'other-trigger-name'],
+  render: function(ctx) { 
+    return [{tag:'span', render: 'Hello'}, {tag:'b', render: ctx.name}] 
+  },
+  events: {
+    click: function(e) {},
+    render: function(e) {}
+  },
+}
+```
+
 | Key | Values | Description |
 | --- | --- | --- |
 | tag | String **Required** | supports any HTML tag |
@@ -15,22 +31,9 @@
 | style | Object or Function | special case for style attribute |
 | render | String, Array, Function or Object | generates children elements, any "template" format is accepted |
 | listen | Array of Strings | re-renders element when triggered. caveat: only works for **render: function()** |
-| events | Object | add event listeners |
+| events | Object | Same as Element.addEventListener('click',function(e){}) |
+| events.render | Function | Special event called when DOM Element just rendered |
 
-
-```js
-{
-  tag: 'div',
-  className: 'css-class',
-  style: {backgroundColor:'blue'},
-  render: [{tag:'h1', render: 'Title'}],
-  listen: ['trigger-name', 'other-trigger-name'],
-  events: {
-    click: function(e) {}, // Same as Element.addEventListener('click',function(e){})
-    render: function(e) {} // Special event, called when DOM Element (e.target) just rendered
-  },
-}
-```
 
 ##The Context
 
