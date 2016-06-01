@@ -4,7 +4,6 @@
 * Pure JavaScript
 * Small footprint: 3.18kb minified (1.2kb gzipped)
 * "Reactive programming" through `listen` and `trigger`
-* Trades code readability for size/performance (yeah... it's kind of ugly)
 
 ##The Template
 
