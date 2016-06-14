@@ -2,14 +2,7 @@ var Client = {
   render: function (options) {
     if (options.context) contextualize(options.context);
     if (!options.reconcile) options.root.innerHTML = '';
-    try {
-      Client.recurse(options.root,options.template,options.context, options.reconcile, false);
-    } catch (e) {
-      if (e.name == 'ReconcileError') {
-        options.root.innerHTML = '';
-        Client.recurse(options.root,options.template,options.context);
-      }
-    }
+    Client.recurse(options.root,options.template,options.context, options.reconcile, false);
   },
   recurse: function (parent, input, context, reconcile, append) {
     if (input == null || typeof input == 'undefined') {
