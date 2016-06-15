@@ -55,7 +55,8 @@ var Client = {
             el.style[styleKey] = value[styleKey];
           });
         } else {
-          el[key] = value;
+          if (key == 'className') key = 'class';
+          el.setAttribute(key,value);
         }
       }
     });
