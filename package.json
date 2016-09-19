@@ -4,12 +4,11 @@
   "description": "Pure Javascript reactive template framework",
   "main": "index.js",
   "scripts": {
+    "build": "webpack",
     "test": "make test"
   },
   "files": [
-    "index.js",
-    "client/",
-    "server/"
+    "index.js"
   ],
   "repository": {
     "type": "git",
@@ -23,6 +22,7 @@
   "homepage": "https://github.com/lucasrg/verse",
   "devDependencies": {
     "chai": "^3.4.1",
-    "mocha": "^2.3.4"
+    "mocha": "^2.3.4",
+    "webpack": "^1.13.2"
   }
 }

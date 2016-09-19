@@ -2,10 +2,10 @@
 ###Universal (isomorphic) template engine.
 
 * Pure JavaScript
-* Small footprint: 3.18kb minified (1.2kb gzipped)
+* Small footprint: 4kb minified (1.5kb gzipped)
 * "Reactive programming" through `listen` and `trigger`
 
-##The Template
+##Template
 
 ```js
 {
@@ -13,8 +13,8 @@
   className: 'css-class',
   style: {backgroundColor:'blue'},
   listen: ['trigger-name', 'other-trigger-name'],
-  render: function(ctx) { 
-    return [{tag:'span', render: 'Hello'}, {tag:'b', render: ctx.name}] 
+  render: function(ctx) {
+    return [{tag:'span', render: 'Hello'}, {tag:'b', render: ctx.name}]
   },
   events: {
     click: function(e) {},
@@ -35,7 +35,7 @@
 | events.render | Function | Special event called when DOM Element just rendered |
 
 
-##The Context
+##Context
 
 For dynamic data, **Verse** uses a `context` object as data source and triggering changes:
 
@@ -44,25 +44,12 @@ var context = {name: 'My name is'}
 verse.render({
   template: function(ctx) {
     return {tag:'h1', listen:['my-trigger'], render: ctx.name}
-  }, 
+  },
   context: context
-})
+}, rootElement)
 
 context.name = 'Jonas';
 context.trigger('my-trigger'); // This will re-render the H1 tag
-```
-
-##The Reconciliation
-
-**Verse** also supports DOM reconciliation, to avoid re-rendering the page on first load.
-It's critical that the `context` in both server and client have the same data.
-
-```js
-verse.render({
-  template: ...,
-  context: ...,
-  reconcile: true
-})
 ```
 
 #Some Examples
@@ -72,9 +59,8 @@ The good old "Hello World"
 
 ```js
 verse.render({
-  root: document.getElementById('body'),
   template: 'Hello World!'
-})
+}, document.getElementById('body'))
 ```
 
 ## Render an Element
@@ -82,9 +68,8 @@ HTML element <i>Hello World!</i>
 
 ```js
 verse.render({
-  root: document.getElementById('body'),
   template: {tag:'i', render:'Hello World!'}
-})
+}, document.getElementById('body'))
 ```
 
 ## Render an Array
@@ -92,9 +77,8 @@ List of HTML elements <i>Hello</i><b>World!</b>
 
 ```js
 verse.render({
-  root: document.getElementById('body'),
   template: [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
-})
+}, document.getElementById('body'))
 ```
 
 ## Render a Function
@@ -105,9 +89,8 @@ var template = function () {
   return [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
 }
 verse.render({
-  root: document.getElementById('body'),
   template: template
-})
+}, document.getElementById('body'))
 ```
 
 ## Passing a Context
@@ -119,10 +102,9 @@ var template = function (context) {
   return [{tag:'i', render:'Hello '}, {tag:'b', render:context.name}]
 }
 verse.render({
-  root: document.getElementById('body'),
   context: context,
   template: template
-})
+},document.getElementById('body'))
 ```
 
 ##Listen and Trigger
@@ -144,10 +126,9 @@ var template = function(ctx) {
   ]
 }
 verse.render({
-  root: document.getElementById('example6'),
   context: context,
   template: template
-})
+},document.getElementById('example6'))
 ```
 
 ## Render Event
@@ -176,10 +157,9 @@ var template = function(ctx) {
   ]
 }
 verse.render({
-  root: document.getElementById('body'),
   context: context,
   template: template
-})
+}, document.getElementById('body'))
 ```
 
 ## Components
@@ -195,17 +175,28 @@ var template = {tag:'ul', render: function (ctx) {
   }
 }
 verse.render({
-  root: document.getElementById('body'),
   context: context,
   template: template
-})
+}, document.getElementById('body'))
 ```
 
 See https://github.com/lucasrg/verse/tree/master/example for a project example.
 
 
+##Reconciliation
+
+**Verse** also supports DOM reconciliation, to avoid re-rendering the page on first load.
+It's critical that the `context` in both server and client have the same data.
+
+```js
+verse.render({
+  template: ...,
+  context: ...,
+  reconcile: true
+}, rootElement)
+```
+
+
 # That's all
 
 Feel free to criticize, complain about YAJL (yet another js lib), ask questions, send Pull Requests or suggestions...
-
-I'll soon release a "verse-bootstrap" project with basic authorization, reconciliation, routing and flux-like usage - as an example of a real world application.

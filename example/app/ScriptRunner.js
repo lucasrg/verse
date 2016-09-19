@@ -1,5 +1,3 @@
-var verse = require('verse/client')
-
 function toScript(example) {
   var script = '';
   if (example.components) {
@@ -11,16 +9,15 @@ function toScript(example) {
   script += "var template = "+example.template+'\n';
 
   script += "verse.render({\n";
-  script += "  root: document.getElementById('"+example.id+"'),\n";
   if (example.context) {
     script += "  context: context,\n";
   }
   script += "  template: template\n";
-  script += "})";
+  script += "}, document.getElementById('"+example.id+"'))";
   return script;
 }
 
-module.exports = function (ctx, props) {
+var ScriptRunner = function (ctx, props) {
   props = props || {};
   var example = toScript(props.example);
 
@@ -29,14 +26,14 @@ module.exports = function (ctx, props) {
     {tag:'h3', render: props.example.description.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")},
     {tag:'div', className:'input', render:[
       {tag:'form', render:[
-        {tag:'pre', render: {tag:'code', className:'language-js', render: example}},
-        // {tag:'textarea', name:'input', rows: example.rows, cols: 120, value: toScript(example)},
+        //{tag:'pre', render: {tag:'code', className:'language-js', render: example}},
+        {tag:'textarea', name:'input', rows: props.example.rows, cols: 120, render: example},
         {tag:'button', render:'Run'}
       ], events:{
         submit: function (e) {
           e.preventDefault();
-          // eval(e.target.elements['input'].value);
-          eval(example);
+          eval(e.target.elements['input'].value);
+          //eval(example);
         }
       }}
     ]},

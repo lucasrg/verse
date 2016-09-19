@@ -1,7 +1,4 @@
-var Examples = require('./Examples');
-var ScriptRunner = require('./ScriptRunner');
-
-module.exports = function (ctx) {
+var App = function (ctx) {
   var examples = Examples.map(function (example) {
     return ScriptRunner(ctx, {example: example});
   })

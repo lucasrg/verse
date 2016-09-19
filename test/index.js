@@ -1,5 +1,5 @@
-var should = require('chai').should(),
-    verse = require('../server/index.js');
+var should = require('chai').should();
+var verse = require('../index.js');
 
 describe('#Server', function() {
   it('render static hello world', function() {
