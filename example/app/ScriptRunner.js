@@ -3,6 +3,7 @@ function toScript(example) {
   if (example.components) {
     script += example.components+'\n\n';
   }
+  script += "var root = document.getElementById('"+example.id+"')\n";
   if (example.context) {
     script += 'var context = '+example.context+'\n';
   }
@@ -13,7 +14,7 @@ function toScript(example) {
     script += "  context: context,\n";
   }
   script += "  template: template\n";
-  script += "}, document.getElementById('"+example.id+"'))";
+  script += "}, root)";
   return script;
 }
 
@@ -26,14 +27,13 @@ var ScriptRunner = function (ctx, props) {
     {tag:'h3', render: props.example.description.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")},
     {tag:'div', className:'input', render:[
       {tag:'form', render:[
-        //{tag:'pre', render: {tag:'code', className:'language-js', render: example}},
+        {tag:'pre', render: {tag:'code', className:'language-js', render: example}},
         {tag:'textarea', name:'input', rows: props.example.rows, cols: 120, render: example},
         {tag:'button', render:'Run'}
       ], events:{
         submit: function (e) {
           e.preventDefault();
           eval(e.target.elements['input'].value);
-          //eval(example);
         }
       }}
     ]},
