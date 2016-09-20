@@ -5,12 +5,45 @@
 * Small footprint: 4kb minified (1.5kb gzipped)
 * "Reactive programming" through `listen` and `trigger`
 
-##Template
+##API
+
+```js
+verse.render(options, [root-element])
+
+// Render as string
+var html = verse.render(options)
+
+// Render in DOM
+var root = document.getElementBy('body')
+verse.render(options, root)
+```
+
+##Options
+```js
+{
+  template: String, Object, Array or Function,
+  context: Object,
+  reconcile: Boolean
+}
+```
+
+##Template option
+
+| Key | Values | Description |
+| --- | --- | --- |
+| tag | String **Required** | supports any HTML tag |
+| attribute | String or Function | supports any HTML attribute (id, name, href, src, etc) |
+| class | String or Function | special case for class attribute |
+| style | Object or Function | special case for style attribute |
+| render | String, Array, Function or Object | generates children elements, any "template" format is accepted |
+| listen | Array of Strings | re-renders element when triggered. caveat: only works for **render: function()** |
+| events | Object | Same as Element.addEventListener('click',function(e){}) |
+| events.render | Function | Special event called when DOM Element just rendered |
 
 ```js
 {
   tag: 'div',
-  className: 'css-class',
+  class: 'css-class',
   style: {backgroundColor:'blue'},
   listen: ['trigger-name', 'other-trigger-name'],
   render: function(ctx) {
@@ -23,19 +56,7 @@
 }
 ```
 
-| Key | Values | Description |
-| --- | --- | --- |
-| tag | String **Required** | supports any HTML tag |
-| attribute | String or Function | supports any HTML attribute (id, name, href, src, etc) |
-| className | String or Function | special case for class attribute |
-| style | Object or Function | special case for style attribute |
-| render | String, Array, Function or Object | generates children elements, any "template" format is accepted |
-| listen | Array of Strings | re-renders element when triggered. caveat: only works for **render: function()** |
-| events | Object | Same as Element.addEventListener('click',function(e){}) |
-| events.render | Function | Special event called when DOM Element just rendered |
-
-
-##Context
+##Context option
 
 For dynamic data, **Verse** uses a `context` object as data source and triggering changes:
 
