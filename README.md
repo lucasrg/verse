@@ -5,6 +5,9 @@
 * Small footprint: 4kb minified (1.5kb gzipped)
 * Reactive programming through `listen` and `trigger`
 
+## Live example
+https://lucasrg.github.io/verse/
+
 ##API
 
 ```js
