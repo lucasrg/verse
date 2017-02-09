@@ -1,21 +1,18 @@
 #Verse
-###Universal (isomorphic) template engine.
+###Universal/isomorphic javascript template engine.
 
 * Pure JavaScript
 * Small footprint: 4kb minified (1.5kb gzipped)
-* "Reactive programming" through `listen` and `trigger`
+* Reactive programming through `listen` and `trigger`
 
 ##API
 
 ```js
-verse.render(options, [root-element])
-
 // Render as string
 var html = verse.render(options)
 
 // Render in DOM
-var root = document.getElementBy('body')
-verse.render(options, root)
+verse.render(options, document.body)
 ```
 
 ##Options
@@ -79,9 +76,7 @@ context.trigger('my-trigger'); // This will re-render the H1 tag
 The good old "Hello World"
 
 ```js
-verse.render({
-  template: 'Hello World!'
-}, document.getElementById('body'))
+verse.render({template: 'Hello World'}, document.body)
 ```
 
 ## Render an Element
@@ -90,7 +85,7 @@ HTML element <i>Hello World!</i>
 ```js
 verse.render({
   template: {tag:'i', render:'Hello World!'}
-}, document.getElementById('body'))
+}, document.body)
 ```
 
 ## Render an Array
@@ -99,57 +94,54 @@ List of HTML elements <i>Hello</i><b>World!</b>
 ```js
 verse.render({
   template: [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
-}, document.getElementById('body'))
+}, document.body)
 ```
 
 ## Render a Function
 Function that returns a list of HTML elements <i>Hello</i><b>World!</b>
 
 ```js
-var template = function () {
-  return [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
-}
 verse.render({
-  template: template
-}, document.getElementById('body'))
+  template: function () {
+    return [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
+  }
+}, document.body)
 ```
 
 ## Passing a Context
 Using a context object as data source: context.name
 
 ```js
-var context = {name:'World!'}
-var template = function (context) {
-  return [{tag:'i', render:'Hello '}, {tag:'b', render:context.name}]
-}
 verse.render({
-  context: context,
-  template: template
-},document.getElementById('body'))
+  context: {name:'World!'},
+  template: function (ctx) {
+    return [{tag:'i', render:'Hello '}, {tag:'b', render:ctx.name}]
+  }
+}, document.body)
 ```
 
 ##Listen and Trigger
 Re-render element using listen, events and context trigger
 
 ```js
-var context = {name:'World!'}
-var template = function(ctx) {
-  return [
-    {tag:'div', listen:['trigger-name'], render: function (context) {
-      return [{tag:'i', render:'Hello '}, {tag:'b', render:context.name}]
-    }},
-    {tag:'button', render:'The World is not enough', events:{
-      click: function(e) {
-        ctx.name = 'Universe!!';
-        ctx.trigger('trigger-name');
-      }
-    }}
-  ]
-}
 verse.render({
-  context: context,
-  template: template
-},document.getElementById('example6'))
+  context: {name:'World!'},
+  template: {
+    tag:'div',
+    listen:['trigger-name'],
+    render: function(ctx) {
+      return [
+        {tag:'div', render: [{tag:'i', render:'Hello '}, {tag:'b', render:ctx.name}] },
+        {tag:'button', render:'The World is not enough', events:{
+          click: function(e) {
+            ctx.name = 'Universe!!';
+            ctx.trigger('trigger-name');
+          }
+        }}
+      ]
+    }
+  }
+}, document.body)
 ```
 
 ## Render Event
@@ -180,7 +172,7 @@ var template = function(ctx) {
 verse.render({
   context: context,
   template: template
-}, document.getElementById('body'))
+}, document.body)
 ```
 
 ## Components
@@ -198,7 +190,7 @@ var template = {tag:'ul', render: function (ctx) {
 verse.render({
   context: context,
   template: template
-}, document.getElementById('body'))
+}, document.body)
 ```
 
 See https://github.com/lucasrg/verse/tree/master/example for a project example.
@@ -220,4 +212,4 @@ verse.render({
 
 # That's all
 
-Feel free to criticize, complain about YAJL (yet another js lib), ask questions, send Pull Requests or suggestions...
+See https://github.com/lucasrg/verse-boot/ for an universal bootstrap project
