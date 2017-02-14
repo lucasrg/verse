@@ -27,14 +27,14 @@ var Verse = {
         var innerHTML = '';
         Object.keys(input).forEach(function(key) {
           var val = input[key];
-          if (key == 'tag' || key == 'listen' || key == 'events' || val == null || typeof val == 'undefined') {
+          if (key == 'tag' || key == 'listen' || key == 'events' || key == 'transition' || val == null || typeof val == 'undefined') {
             // Ignore
           } else if (key == 'render') {
             innerHTML = Verse._renderString(val, context);
           } else {
             if (key == 'className') key = 'class';
             if (typeof val == 'function') {
-              var value = val(context);
+              var value = val(context) || '';
             } else {
               var value = val;
             }
@@ -86,7 +86,7 @@ var Verse = {
   _renderElement: function (el, input, context, initialize, triggers) {
     Object.keys(input).forEach(function(key) {
       var val = input[key];
-      if (val == null || typeof val == 'undefined' || key == 'tag') {
+      if (val == null || typeof val == 'undefined' || key == 'tag' || key == 'transition') {
         // Ignore
       } else if (key == 'listen' && context) {
         context.__register(input, el);
@@ -102,16 +102,19 @@ var Verse = {
         }
       } else {
         if (typeof val == 'function') {
-          var value = val(context);
+          var value = val(context) || '';
         } else {
           var value = val;
         }
+        if (key == 'className') key = 'class';
         if (key == 'style') {
           Object.keys(value).forEach(function(styleKey) {
             el.style[styleKey] = value[styleKey];
           });
+        } else if (key == 'class') {
+          el.setAttribute(key,el.__transitionClass || value);
+          if (input.transition) el.__transitionClass = value;
         } else {
-          if (key == 'className') key = 'class';
           el.setAttribute(key,value);
         }
       }
@@ -124,6 +127,13 @@ var Verse = {
           triggers: triggers || []
         });
       }, 0)
+    }
+
+    if (input.transition && el.__transitionClass) {
+      if (el.__transitionTimeout) clearTimeout(el.__transitionTimeout)
+      el.__transitionTimeout = setTimeout(function () {
+        el.className = el.__transitionClass
+      }, input.transition)
     }
   },
 
