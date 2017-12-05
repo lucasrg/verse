@@ -1,5 +1,6 @@
-#Verse
-###Universal/isomorphic javascript template engine.
+# Verse
+
+### Universal/isomorphic javascript template engine.
 
 * Pure JavaScript
 * Small footprint: 4kb minified (1.5kb gzipped)
@@ -8,7 +9,7 @@
 ## Live example
 https://lucasrg.github.io/verse/
 
-##API
+## API
 
 ```js
 // Render as string
@@ -18,7 +19,7 @@ var html = verse.render(options)
 verse.render(options, document.body)
 ```
 
-##Options
+## Options
 ```js
 {
   template: String, Object, Array or Function,
@@ -27,7 +28,7 @@ verse.render(options, document.body)
 }
 ```
 
-##Template option
+## Template option
 
 | Key | Values | Description |
 | --- | --- | --- |
@@ -56,7 +57,7 @@ verse.render(options, document.body)
 }
 ```
 
-##Context option
+## Context option
 
 For dynamic data, **Verse** uses a `context` object as data source and triggering changes:
 
@@ -73,9 +74,9 @@ context.name = 'Jonas';
 context.trigger('my-trigger'); // This will re-render the H1 tag
 ```
 
-#Some Examples
+# Some Examples
 
-##Render a String
+## Render a String
 The good old "Hello World"
 
 ```js
@@ -96,7 +97,10 @@ List of HTML elements <i>Hello</i><b>World!</b>
 
 ```js
 verse.render({
-  template: [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
+  template: [
+    {tag:'i', render:'Hello '},
+    {tag:'b', render:'World!'}
+   ]
 }, document.body)
 ```
 
@@ -106,7 +110,10 @@ Function that returns a list of HTML elements <i>Hello</i><b>World!</b>
 ```js
 verse.render({
   template: function () {
-    return [{tag:'i', render:'Hello '}, {tag:'b', render:'World!'}]
+    return [
+      {tag:'i', render:'Hello '},
+      {tag:'b', render:'World!'}
+     ]
   }
 }, document.body)
 ```
@@ -118,12 +125,15 @@ Using a context object as data source: context.name
 verse.render({
   context: {name:'World!'},
   template: function (ctx) {
-    return [{tag:'i', render:'Hello '}, {tag:'b', render:ctx.name}]
+    return [
+      {tag:'i', render:'Hello '},
+      {tag:'b', render:ctx.name}
+     ]
   }
 }, document.body)
 ```
 
-##Listen and Trigger
+## Listen and Trigger
 Re-render element using listen, events and context trigger
 
 ```js
@@ -131,16 +141,26 @@ verse.render({
   context: {name:'World!'},
   template: {
     tag:'div',
-    listen:['trigger-name'],
+    listen:'trigger-name',
     render: function(ctx) {
       return [
-        {tag:'div', render: [{tag:'i', render:'Hello '}, {tag:'b', render:ctx.name}] },
-        {tag:'button', render:'The World is not enough', events:{
-          click: function(e) {
-            ctx.name = 'Universe!!';
-            ctx.trigger('trigger-name');
+        {
+          tag:'div',
+          render: [
+            {tag:'i', render:'Hello '},
+            {tag:'b', render:ctx.name}
+          ]
+        },
+        {
+          tag:'button',
+          render:'The World is not enough',
+          events:{
+            click: function(e) {
+              ctx.name = 'Universe!!';
+              ctx.trigger('trigger-name');
+            }
           }
-        }}
+        }
       ]
     }
   }
